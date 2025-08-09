@@ -170,8 +170,7 @@ services:
       - 7878:7878
     networks:
       servarrnetwork:
-        ipv4_address:   
-
+        ipv4_address: 172.39.0.4
   lidarr:
     container_name: lidarr
     image: lscr.io/linuxserver/lidarr:latest
