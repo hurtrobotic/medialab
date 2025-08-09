@@ -16,8 +16,19 @@ networks:
       config:
         - subnet: 172.39.0.0/24
 
+
+volumes:
+  gluetun:
+  qbittorrent:
+  data:
+  nzbget:
+  prowlarr:
+  sonarr:
+  radarr:
+  lidarr: 
+  bazarr: 
+
 services:
-  # airvpn recommended (referral url: https://airvpn.org/?referred_by=673908)
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
@@ -29,13 +40,13 @@ services:
       servarrnetwork:
         ipv4_address: 172.39.0.2
     ports:
-      - ${FIREWALL_VPN_INPUT_PORTS}:${FIREWALL_VPN_INPUT_PORTS} # airvpn forwarded port, pulled from .env
+        - ${FIREWALL_VPN_INPUT_PORTS}:${FIREWALL_VPN_INPUT_PORTS} # airvpn forwarded port, pulled from .env
       - 8080:8080 # qbittorrent web interface
       - 6881:6881 # qbittorrent torrent port
       - 6789:6789 # nzbget
       - 9696:9696 # prowlarr
     volumes:
-      - ./gluetun:/gluetun
+      - gluetun:/gluetun
     # Make a '.env' file in the same directory.
     env_file:
       - .env
@@ -59,8 +70,8 @@ services:
       - WEBUI_PORT=8080 # must match "qbittorrent web interface" port number in gluetun's service above
       - TORRENTING_PORT=${FIREWALL_VPN_INPUT_PORTS} # airvpn forwarded port, pulled from .env
     volumes:
-      - ./qbittorrent:/config
-      - /data:/data
+      - qbittorrent:/config
+      - data:/data
     depends_on:
       gluetun:
         condition: service_healthy
@@ -84,7 +95,7 @@ services:
       - TZ=${TZ}
     restart: always
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /run/user/1000/docker.sock:/var/run/docker.sock
 
   nzbget:
     image: lscr.io/linuxserver/nzbget:latest
@@ -95,8 +106,8 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./nzbget:/config
-      - /data:/data
+      - nzbget:/config
+      - data:/data
     depends_on:
       gluetun:
         condition: service_healthy
@@ -113,7 +124,7 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./prowlarr:/config
+      - prowlarr:/config
     restart: unless-stopped
     depends_on:
       gluetun:
@@ -131,8 +142,8 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./sonarr:/config
-      - /data:/data
+      - sonarr:/config
+      - data:/data
     ports:
       - 8989:8989
     networks:
@@ -149,8 +160,8 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./radarr:/config
-      - /data:/data
+      - radarr:/config
+      - data:/data
     ports:
       - 7878:7878
     networks:
@@ -163,8 +174,8 @@ services:
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./lidarr:/config
-      - /data:/data
+      - lidarr:/config
+      - data:/data
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -185,8 +196,8 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./bazarr:/config
-      - /data:/data
+      - bazarr:/config
+      - data:/data
     ports:
       - 6767:6767
     networks:
