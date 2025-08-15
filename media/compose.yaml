@@ -17,7 +17,7 @@ networks:
         - subnet: 172.39.0.0/24
 
 volumes:
-  gluetun:
+#  gluetun:
   qbittorrent:
   data:
   cert-data:
@@ -78,8 +78,7 @@ services:
       - 6789:6789 # nzbget
       - 9696:9696 # prowlarr
     volumes:
-      - gluetun:/gluetun
-      - ./ovpn:/ovpn
+      - ./gluetun:/gluetun
     # Make a '.env' file in the same directory.
     env_file:
       - .env
