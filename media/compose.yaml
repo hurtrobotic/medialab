@@ -79,6 +79,7 @@ services:
       - 9696:9696 # prowlarr
     volumes:
       - gluetun:/gluetun
+      - ./ovpn:/ovpn
     # Make a '.env' file in the same directory.
     env_file:
       - .env
