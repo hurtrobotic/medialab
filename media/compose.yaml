@@ -59,7 +59,7 @@ services:
         - cert-data:/certs
     networks:
       servarrnetwork:
-        ipv4_address: 172.39.0.1
+        ipv4_address: 172.39.0.10
 
   gluetun:
     image: qmcgaw/gluetun
