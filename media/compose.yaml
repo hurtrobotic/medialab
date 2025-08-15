@@ -16,7 +16,6 @@ networks:
       config:
         - subnet: 172.39.0.0/24
 
-
 volumes:
   gluetun:
   qbittorrent:
@@ -29,6 +28,38 @@ volumes:
   bazarr: 
 
 services:
+
+  ssl-certs:
+    build:
+      context: ./ssl-certs-generator
+    container_name: ssl-certs
+    env_file:
+      - .ssl-certs.env    
+    volumes:
+        - cert-data:/certs
+        - ./ssl-certs-generator/ca:/ca
+  
+  nginx:
+    image: nginx:1.27-bookworm
+    hostname: nginx    
+    container_name: nginx
+    restart: "unless-stopped"
+    depends_on:
+      - ssl-certs
+    ports:
+        - "443:443"
+    env_file:
+      - .ssl-certs.env        
+    volumes:
+        - ./nginx/conf/templates:/etc/nginx/templates
+        - ./nginx/conf/fastcgi_params.conf:/etc/nginx/fastcgi_params.conf
+        - ./nginx/conf/mime.types:/etc/nginx/mime.types
+        - ./nginx/scripts/docker-entrypoint.sh:/docker-entrypoint.d/1-customEntryPoint.sh:ro
+        - cert-data:/certs
+    networks:
+      servarrnetwork:
+        ipv4_address: 172.39.0.1
+
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
@@ -208,36 +239,18 @@ services:
       servarrnetwork:
         ipv4_address: 172.39.0.6
 
-# Newer additions to this stack feel. Remove the '#' to add the service.
-#
-#  ytdl-sub:
-#    image: ghcr.io/jmbannon/ytdl-sub:latest
-#    container_name: ytdl-sub
-#    environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-#      - TZ=${TZ}
-#      - DOCKER_MODS=linuxserver/mods:universal-cron
-#    volumes:
-#      - ./ytdl-sub:/config
-#      - /data/youtube:/youtube
-#    networks:
-#      servarrnetwork:
-#        ipv4_address: 172.39.0.8
-#    restart: unless-stopped
-#
-#  jellyseerr:
-#    container_name: jellyseerr
-#    image: fallenbagel/jellyseerr:latest
-#    environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-#      - TZ=${TZ}
-#    volumes:
-#      - ./jellyseerr:/app/config
-#    ports:
-#      - 5055:5055
-#    networks:
-#      servarrnetwork:
-#        ipv4_address: 172.39.0.9
-#    restart: unless-stopped
+  # jellyseerr:
+  #   container_name: jellyseerr
+  #   image: fallenbagel/jellyseerr:latest
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - ./jellyseerr:/app/config
+  #   ports:
+  #     - 5055:5055
+  #   networks:
+  #     servarrnetwork:
+  #       ipv4_address: 172.39.0.9
+  #   restart: unless-stopped

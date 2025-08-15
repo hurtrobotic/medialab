@@ -1,0 +1,139 @@
+#!/bin/bash
+
+echo "----------------------------"
+echo "| SSL Cert Generator |"
+echo "----------------------------"
+echo
+export PUID=${PUID:-"1000"}
+export PGID=${PGID:-"1000"}
+export CA_KEY=${CA_KEY-"ca-key.pem"}
+export CA_CERT=${CA_CERT-"ca.pem"}
+export CA_SUBJECT=${CA_SUBJECT:-"test-ca"}
+export CA_EXPIRE=${CA_EXPIRE:-"60"}
+
+export SSL_CONFIG=${SSL_CONFIG:-"openssl.cnf"}
+export SSL_KEY=${SSL_KEY:-"key.pem"}
+export SSL_CSR=${SSL_CSR:-"key.csr"}
+export SSL_CERT=${SSL_CERT:-"cert.pem"}
+export SSL_SIZE=${SSL_SIZE:-"2048"}
+export SSL_EXPIRE=${SSL_EXPIRE:-"60"}
+
+export SSL_SUBJECT=${MY_HOST_NAME}
+export SSL_DNS=${MY_HOST_NAME}
+export SSL_IP=${SSL_IP}
+export COUNTRY_ISO=${COUNTRY_ISO}
+export COUNTRY_NAME=${COUNTRY_NAME}
+export ORGANISATION_NAME=${ORGANISATION_NAME}
+export EMAIL_ADDRESS=${EMAIL_ADDRESS}
+
+export DEBUG=${DEBUG:=1}
+echo "--> Certificate Authority : get Files from config"
+if [[ -e /ca ]]; then
+    cp -r /ca/* .
+fi
+
+
+echo "--> Certificate Authority"
+
+if [[ -e ./${CA_KEY} ]]; then
+    echo "====> Using existing CA Key ${CA_KEY}"
+else
+    echo "====> Generating new CA key ${CA_KEY}"
+    openssl genrsa -out ${CA_KEY} 2048
+fi
+
+if [[ -e ./${CA_CERT} ]]; then
+    echo "====> Using existing CA Certificate ${CA_CERT}"
+else
+    echo "====> Generating new CA Certificate ${CA_CERT}"
+    openssl req -x509 -new -nodes -key ${CA_KEY} -days ${CA_EXPIRE} -out ${CA_CERT} -subj "/CN=${CA_SUBJECT}"  || exit 1
+fi
+
+[[ -n $DEBUG ]] && cat $CA_CERT
+
+echo "====> Generating new config file ${SSL_CONFIG}"
+
+cat > ${SSL_CONFIG} <<EOM
+[ req ]
+prompt             = no
+utf8               = yes
+# X.509 v3 extensions
+req_extensions     = req_v3_ext
+# base request
+distinguished_name = req_distinguished_name
+
+[ req_distinguished_name ]
+countryName        = "${COUNTRY_ISO}"
+localityName       = "${COUNTRY_NAME}"
+organizationName   = "${ORGANISATION_NAME}"
+emailAddress       = "${EMAIL_ADDRESS}"
+EOM
+
+if [[ -n ${MY_HOST_NAME} ]]; then
+echo 'commonName         = "'${MY_HOST_NAME}'"' >> ${SSL_CONFIG}
+fi
+
+if [[ -n ${SSL_DNS} || -n ${SSL_IP} ]]; then
+    cat >> ${SSL_CONFIG} <<EOM
+
+[alt_names]
+EOM
+    IFS=","
+    dns=(${SSL_DNS})
+    dns+=(${SSL_SUBJECT})
+    for i in "${!dns[@]}"; do
+      echo DNS.$((i+1)) = ${dns[$i]} >> ${SSL_CONFIG}
+    done
+
+    if [[ -n ${SSL_IP} ]]; then
+        ip=(${SSL_IP})
+        for i in "${!ip[@]}"; do
+          echo IP.$((i+1)) = ${ip[$i]} >> ${SSL_CONFIG}
+        done
+    fi
+cat >> ${SSL_CONFIG} <<EOM
+
+[ req_v3_ext ]    
+subjectAltName = @alt_names
+EOM
+fi
+
+if [[ -e ./${SSL_KEY} ]]; then
+    echo "====> Using existing SSL KEY ${SSL_KEY}"
+else
+    echo "====> Generating new SSL KEY ${SSL_KEY}"
+    openssl genrsa -out ${SSL_KEY} ${SSL_SIZE}  || exit 1
+fi
+
+if [[ -e ./${SSL_CSR} ]]; then
+    echo "====> Using existing SSL CSR ${SSL_CSR}"
+else
+    echo "====> Generating new SSL CSR ${SSL_CSR}"
+    openssl req -new -key ${SSL_KEY} -out ${SSL_CSR} -subj "/CN=${SSL_SUBJECT}" -config ${SSL_CONFIG}  || exit 1
+fi
+
+if [[ -e ./${SSL_CERT} ]]; then
+    echo "====> Using existing SSL CERT ${SSL_CERT}"
+else
+    echo "====> Generating new SSL CERT ${SSL_CERT}"
+    openssl x509 -req -in ${SSL_CSR} -CA ${CA_CERT} -CAkey ${CA_KEY} -CAcreateserial -out ${SSL_CERT} \
+        -days ${SSL_EXPIRE} -extensions req_v3_ext -extfile ${SSL_CONFIG}  || exit 1
+fi
+
+chown -R ${PUID}:${PGID} .
+echo -n
+echo -n
+echo "***** CA CERT"
+cat $CA_CERT
+echo -n
+echo -n
+echo "***** SSL_KEY"
+cat $SSL_KEY
+echo -n
+echo -n
+echo "***** SSL CERT"
+cat $SSL_CERT
+echo -n
+echo -n
+echo "***** COMBINE CA and SSL Cert in bundle"
+cat $SSL_CERT $CA_CERT > ssl-bundle.crt

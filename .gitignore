@@ -1,2 +1,4 @@
 medialab.code-workspace
 media/.env
+media/.ssl-certs.env
+media/ssl-certs-generator/client-certs/ws-client.cnf

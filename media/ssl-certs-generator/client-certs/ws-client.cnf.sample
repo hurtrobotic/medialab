@@ -1,0 +1,19 @@
+[ req ]
+prompt = no
+utf8 = yes
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+[ req_distinguished_name ]
+countryName  = "BE"
+0.organizationName = "home"
+organizationalUnitName = "local"
+commonName = "local.home"
+emailAddress = "email@emailAddress.com"
+[ client_reqext ]
+keyUsage = critical,digitalSignature
+extendedKeyUsage = clientAuth
+subjectKeyIdentifier = hash
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth
