@@ -20,15 +20,15 @@ volumes:
   gluetun:
   qbittorrent:
   data:
+  cert-data:
   nzbget:
   prowlarr:
   sonarr:
   radarr:
   lidarr: 
   bazarr: 
-
+  
 services:
-
   ssl-certs:
     build:
       context: ./ssl-certs-generator
@@ -44,6 +44,7 @@ services:
     hostname: nginx    
     container_name: nginx
     restart: "unless-stopped"
+    
     depends_on:
       - ssl-certs
     ports:
