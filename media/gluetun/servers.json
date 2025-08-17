@@ -7,14 +7,25 @@
       {
         "vpn": "openvpn",
         "country": "Belgium",
-        "region": "Luxembourg",
+        "region": "Europe",
         "city": "Frankfurt am Main",
         "hostname": "my2-custom-udp.185.232.23.110.nip.io",
         "udp": true,
         "ips": [
           "185.232.23.110"
         ]
-      }	  
+      },
+      {
+        "vpn": "openvpn",
+        "country": "Belgium",
+        "region": "Europe",
+        "city": "Brussels",
+        "hostname": "my2-custom-tcp.146.70.123.85.nip.io",
+        "udp": true,
+        "ips": [
+          "146.70.123.85"
+        ]
+      }            	  
     ]
   }
 }
