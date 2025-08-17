@@ -9,8 +9,8 @@
         "country": "Belgium",
         "region": "Europe",
         "city": "Frankfurt am Main",
-        "hostname": "my2-custom-udp.185.232.23.110.nip.io",
-        "udp": true,
+        "hostname": "my2-custom-tcp.185.232.23.110.nip.io",
+        "udp": false,
         "ips": [
           "185.232.23.110"
         ]
@@ -21,7 +21,7 @@
         "region": "Europe",
         "city": "Brussels",
         "hostname": "my2-custom-tcp.146.70.123.85.nip.io",
-        "udp": true,
+        "udp": false,
         "ips": [
           "146.70.123.85"
         ]
