@@ -9,7 +9,7 @@
         "country": "Belgium",
         "region": "Luxembourg",
         "city": "Frankfurt am Main",
-        "hostname": "my2-custom-udp.ptoserver.com",
+        "hostname": "my2-custom-udp.185.232.23.110.nip.io",
         "udp": true,
         "ips": [
           "185.232.23.110"
