@@ -489,7 +489,8 @@
         "hostname": "af2-auto-tcp.ptoserver.com",
         "tcp": true,
         "ips": [
-          "172.111.208.6"
+          "172.111.208.6",
+          "185.232.23.112"
         ]
       },
       {
