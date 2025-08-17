@@ -2111,16 +2111,15 @@
       },
       {
         "vpn": "openvpn",
-        "country": "Custom",
-        "region": "Custom",
-        "city": "Custom Server",
+        "country": "Belgium",
+        "region": "Luxembourg",
+        "city": "Frankfurt",
         "hostname": "my2-custom-udp.ptoserver.com",
         "udp": true,
         "ips": [
           "185.232.23.112"
         ]
-      }
-	  
+      }	  
     ]
   }
 }
